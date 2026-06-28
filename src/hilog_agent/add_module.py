@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 
 import yaml
@@ -14,6 +15,8 @@ from hilog_agent.schemas.results import (
     WrittenFile,
 )
 
+logger = logging.getLogger(__name__)
+
 
 class AddModuleService:
     def __init__(self, config: AgentConfig, client: JsonGeneratingClient):
@@ -29,6 +32,14 @@ class AddModuleService:
         backup: bool,
         now: str,
     ) -> AddModuleResult:
+        logger.info(
+            "starting add-module feature=%s module=%s code_path=%s force=%s backup=%s",
+            feature,
+            module,
+            module_code_path,
+            force,
+            backup,
+        )
         _validate_simple_name(feature, "feature")
         _validate_simple_name(module, "module")
         validate_relative_path(module_code_path)
@@ -56,6 +67,7 @@ class AddModuleService:
             raise ValueError("generated module name mismatch")
         if module_model.code_path != module_code_path:
             raise ValueError("generated module code_path mismatch")
+        logger.info("validated generated module yaml module=%s", module)
 
         feature_result = generate_validated(
             client=self.client,
@@ -66,6 +78,7 @@ class AddModuleService:
         updated_feature_data = yaml.safe_load(feature_result.updated_feature_yaml)
         updated_feature = FeatureYaml.model_validate(updated_feature_data)
         self._validate_feature_diff(old_feature, updated_feature, module, now, force)
+        logger.info("validated updated feature yaml feature=%s module=%s", feature, module)
 
         module_path.parent.mkdir(parents=True, exist_ok=True)
         written_files: list[WrittenFile] = []
@@ -79,13 +92,14 @@ class AddModuleService:
                     )
                     backup_path.write_text(target.read_text(encoding="utf-8"), encoding="utf-8")
                     written_files.append(WrittenFile(path=str(backup_path), action="backup_created"))
+                    logger.info("created backup path=%s", backup_path)
 
         module_path.write_text(module_result.module_yaml, encoding="utf-8")
         feature_path.write_text(feature_result.updated_feature_yaml, encoding="utf-8")
         written_files.append(WrittenFile(path=str(module_path), action=module_action))
         written_files.append(WrittenFile(path=str(feature_path), action="updated"))
 
-        return AddModuleResult(
+        result = AddModuleResult(
             feature=feature,
             module=module,
             written_files=written_files,
@@ -94,6 +108,8 @@ class AddModuleService:
             warnings=module_result.warnings + feature_result.warnings,
             related_feature_suggestions=feature_result.related_feature_suggestions,
         )
+        logger.info("wrote add-module outputs feature=%s module=%s files=%d", feature, module, len(written_files))
+        return result
 
     def _validate_feature_diff(
         self,
@@ -104,6 +120,7 @@ class AddModuleService:
         force: bool,
     ) -> None:
         if old.name != new.name or old.display_name != new.display_name or old.description != new.description:
+            logger.error("feature diff rejected: identity fields changed")
             raise ValueError("feature identity fields must not change")
         if old.keywords != new.keywords:
             raise ValueError("keywords must not change in add-module")

@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+import logging
 import re
 from typing import Literal
 
 from hilog_agent.hilog import HilogEvent
 
+logger = logging.getLogger(__name__)
 
 LEVEL_ALIASES = {
     "DEBUG": "D",
@@ -45,9 +47,11 @@ def event_matches_pattern(event: HilogEvent, pattern: LogPattern) -> bool:
 
 
 def match_events(events: list[HilogEvent], patterns: list[LogPattern]) -> list[LogMatch]:
+    logger.info("matching log events events=%d patterns=%d", len(events), len(patterns))
     matches: list[LogMatch] = []
     for event in events:
         for pattern in patterns:
             if event_matches_pattern(event, pattern):
                 matches.append(LogMatch(event=event, pattern=pattern))
+    logger.info("matched log events matches=%d", len(matches))
     return matches

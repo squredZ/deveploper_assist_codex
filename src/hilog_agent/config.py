@@ -1,8 +1,11 @@
 from pathlib import Path
+import logging
 from typing import Literal
 
 import yaml
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisConfig(BaseModel):
@@ -82,9 +85,20 @@ class AgentConfig(BaseModel):
 
 def load_config(path: Path) -> AgentConfig:
     if not path.exists():
+        logger.info("config file not found; using defaults path=%s", path)
         return AgentConfig()
+    logger.info("loading config file path=%s", path)
     data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
-    return AgentConfig.model_validate(data)
+    config = AgentConfig.model_validate(data)
+    logger.info(
+        "loaded config features_dir=%s repo_root=%s llm_provider=%s",
+        config.features_dir,
+        config.repo_root,
+        config.llm.provider,
+    )
+    if config.llm.api_key:
+        logger.warning("config contains plaintext llm.api_key; prefer api_key_env")
+    return config
 
 
 def redact_secret(value: str | None) -> str | None:
