@@ -56,6 +56,27 @@ def test_feature_schema_accepts_valid_data():
     assert feature.call_chains[0].steps[0].async_ is False
 
 
+def test_call_chain_step_accepts_async_alias_and_serializes_alias():
+    feature = FeatureYaml.model_validate(valid_feature_data())
+
+    step_dump = feature.model_dump()["call_chains"][0]["steps"][0]
+    assert step_dump["async"] is False
+    assert "async_" not in step_dump
+
+
+def test_call_chain_step_accepts_async_field_name():
+    data = valid_feature_data()
+    step = data["call_chains"][0]["steps"][0]
+    step["async_"] = step.pop("async")
+
+    feature = FeatureYaml.model_validate(data)
+
+    assert feature.call_chains[0].steps[0].async_ is False
+    step_dump = feature.model_dump()["call_chains"][0]["steps"][0]
+    assert step_dump["async"] is False
+    assert "async_" not in step_dump
+
+
 def test_active_feature_requires_keywords():
     data = valid_feature_data()
     data["keywords"] = []

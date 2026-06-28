@@ -1,7 +1,7 @@
 from typing import Literal
 import re
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from hilog_agent.schemas.common import (
     Confidence,
@@ -83,6 +83,12 @@ class CandidateExpectedLog(BaseModel):
 
 
 class CandidateStep(BaseModel):
+    model_config = ConfigDict(
+        serialize_by_alias=True,
+        validate_by_alias=True,
+        validate_by_name=True,
+    )
+
     id: str
     description: str
     file: str | None = None

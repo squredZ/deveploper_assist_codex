@@ -37,6 +37,27 @@ def test_module_schema_accepts_valid_data():
     assert module.name == "camera_ui"
 
 
+def test_candidate_step_accepts_async_alias_and_serializes_alias():
+    module = ModuleYaml.model_validate(valid_module_data())
+
+    step_dump = module.model_dump()["candidate_steps"][0]
+    assert step_dump["async"] is False
+    assert "async_" not in step_dump
+
+
+def test_candidate_step_accepts_async_field_name():
+    data = valid_module_data()
+    step = data["candidate_steps"][0]
+    step["async_"] = step.pop("async")
+
+    module = ModuleYaml.model_validate(data)
+
+    assert module.candidate_steps[0].async_ is False
+    step_dump = module.model_dump()["candidate_steps"][0]
+    assert step_dump["async"] is False
+    assert "async_" not in step_dump
+
+
 def test_related_step_must_reference_candidate_step():
     data = valid_module_data()
     data["logs"] = [
