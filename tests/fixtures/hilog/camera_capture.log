@@ -1,0 +1,4 @@
+2026-06-28 14:35:01.120  1234  5678 I CameraUI: click capture
+2026-06-28 14:35:01.350  1234  5678 I CameraService: Start capture
+not a hilog line
+2026-06-28 14:35:03.500  1234  5678 E CameraService: Capture failed
