@@ -43,5 +43,19 @@ def analyze_log(
     typer.echo(analyze_log_summary(log))
 
 
+@app.command("add-module")
+def add_module(
+    feature: str = typer.Option(..., "--feature"),
+    module: str = typer.Option(..., "--module"),
+    path: str = typer.Option(..., "--path"),
+    force: bool = typer.Option(False, "--force"),
+    backup: bool = typer.Option(False, "--backup"),
+) -> None:
+    typer.echo(
+        f"add-module requested for feature={feature}, module={module}, path={path}, "
+        f"force={force}, backup={backup}"
+    )
+
+
 def main() -> None:
     app()

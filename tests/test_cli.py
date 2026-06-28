@@ -21,3 +21,11 @@ def test_analyze_log_command_exists():
     result = runner.invoke(app, ["analyze-log", "--help"])
     assert result.exit_code == 0
     assert "--log" in result.stdout
+
+
+def test_add_module_command_exists():
+    runner = CliRunner()
+    result = runner.invoke(app, ["add-module", "--help"])
+    assert result.exit_code == 0
+    assert "--module" in result.stdout
+    assert "--force" in result.stdout
