@@ -5,6 +5,16 @@ from typing import Literal
 from hilog_agent.hilog import HilogEvent
 
 
+LEVEL_ALIASES = {
+    "DEBUG": "D",
+    "INFO": "I",
+    "WARN": "W",
+    "WARNING": "W",
+    "ERROR": "E",
+    "FATAL": "F",
+}
+
+
 @dataclass(frozen=True)
 class LogPattern:
     tag: str
@@ -19,10 +29,15 @@ class LogMatch:
     pattern: LogPattern
 
 
+def _normalize_level(level: str) -> str:
+    normalized = level.upper()
+    return LEVEL_ALIASES.get(normalized, normalized)
+
+
 def event_matches_pattern(event: HilogEvent, pattern: LogPattern) -> bool:
     if event.tag != pattern.tag:
         return False
-    if pattern.level and event.level != pattern.level:
+    if pattern.level and _normalize_level(event.level) != _normalize_level(pattern.level):
         return False
     if pattern.match_type == "regex":
         return re.search(pattern.pattern, event.message) is not None

@@ -5,7 +5,7 @@ import re
 
 
 HILOG_RE = re.compile(
-    r"^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s+"
+    r"^(?P<time>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6})\s+"
     r"(?P<pid>\d+)\s+(?P<tid>\d+)\s+"
     r"(?P<level>[A-Z])\s+"
     r"(?P<tag>[^:]+):\s*(?P<message>.*)$"

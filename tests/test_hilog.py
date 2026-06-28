@@ -17,6 +17,19 @@ def test_hilog_event_has_timestamp_property():
     assert parsed.events[0].timestamp == datetime(2026, 6, 28, 14, 35, 1, 120000)
 
 
+def test_parse_hilog_accepts_variable_fractional_seconds(tmp_path: Path):
+    log_path = tmp_path / "variable_fraction.log"
+    log_path.write_text(
+        "2026-06-28 14:35:01.1  1234  5678 I CameraUI: click capture\n",
+        encoding="utf-8",
+    )
+
+    parsed = parse_hilog_file(log_path)
+
+    assert parsed.parsed_lines == 1
+    assert parsed.events[0].timestamp == datetime(2026, 6, 28, 14, 35, 1, 100000)
+
+
 def test_filter_events_by_time():
     parsed = parse_hilog_file(Path("tests/fixtures/hilog/camera_capture.log"))
     events = filter_events_by_time(
