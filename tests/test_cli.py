@@ -29,3 +29,13 @@ def test_add_module_command_exists():
     assert result.exit_code == 0
     assert "--module" in result.stdout
     assert "--force" in result.stdout
+
+
+def test_analyze_log_fixture_outputs_stats():
+    runner = CliRunner()
+    result = runner.invoke(
+        app,
+        ["analyze-log", "--log", "tests/fixtures/hilog/camera_capture.log"],
+    )
+    assert result.exit_code == 0
+    assert "parsed_lines: 3" in result.stdout
