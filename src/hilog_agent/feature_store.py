@@ -7,6 +7,22 @@ from hilog_agent.schemas.feature import FeatureYaml
 from hilog_agent.schemas.module import ModuleYaml
 
 
+def _is_simple_feature_name(feature_name: str) -> bool:
+    return not (
+        not feature_name
+        or feature_name in {".", ".."}
+        or "/" in feature_name
+        or "\\" in feature_name
+        or Path(feature_name).is_absolute()
+    )
+
+
+def _validate_feature_name(feature_name: str) -> str:
+    if not _is_simple_feature_name(feature_name):
+        raise ValueError(f"invalid feature name: {feature_name}")
+    return feature_name
+
+
 @dataclass
 class LoadedFeature:
     feature: FeatureYaml
@@ -24,11 +40,14 @@ class FeatureStore:
         names = [
             path.name
             for path in self.features_dir.iterdir()
-            if path.is_dir() and (path / "feature.yaml").exists()
+            if path.is_dir()
+            and (path / "feature.yaml").exists()
+            and _is_simple_feature_name(path.name)
         ]
         return sorted(names)
 
     def read_feature_dir(self, feature_name: str) -> LoadedFeature:
+        _validate_feature_name(feature_name)
         feature_dir = self.features_dir / feature_name
         feature_path = feature_dir / "feature.yaml"
         if not feature_path.exists():
