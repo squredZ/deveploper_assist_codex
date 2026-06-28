@@ -8,3 +8,16 @@ def test_cli_version():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
     assert "hilog-agent" in result.stdout
+
+
+def test_ask_command_requires_question():
+    runner = CliRunner()
+    result = runner.invoke(app, ["ask"])
+    assert result.exit_code != 0
+
+
+def test_analyze_log_command_exists():
+    runner = CliRunner()
+    result = runner.invoke(app, ["analyze-log", "--help"])
+    assert result.exit_code == 0
+    assert "--log" in result.stdout

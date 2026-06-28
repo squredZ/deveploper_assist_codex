@@ -1,6 +1,9 @@
+from pathlib import Path
+
 import typer
 
 from hilog_agent import __version__
+from hilog_agent.analyze import analyze_log_summary, ask_feature
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -22,6 +25,22 @@ def root(
     ),
 ) -> None:
     return None
+
+
+@app.command("ask")
+def ask(
+    question: str = typer.Option(..., "--question"),
+    feature: str = typer.Option(..., "--feature"),
+    features_dir: Path = typer.Option(Path("features"), "--features-dir"),
+) -> None:
+    typer.echo(ask_feature(features_dir, feature, question))
+
+
+@app.command("analyze-log")
+def analyze_log(
+    log: Path = typer.Option(..., "--log"),
+) -> None:
+    typer.echo(analyze_log_summary(log))
 
 
 def main() -> None:
