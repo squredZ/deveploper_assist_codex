@@ -123,7 +123,11 @@ class AnalysisResult(BaseModel):
 
     @model_validator(mode="after")
     def validate_evidence_references(self):
-        evidence_ids = {item.id for item in self.evidence}
+        evidence_ids = set()
+        for item in self.evidence:
+            if item.id in evidence_ids:
+                raise ValueError("duplicate evidence id")
+            evidence_ids.add(item.id)
         for cause in self.root_causes:
             if cause.supporting_evidence and not set(cause.supporting_evidence) <= evidence_ids:
                 raise ValueError("root cause references unknown evidence")

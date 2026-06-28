@@ -147,3 +147,32 @@ def test_analysis_result_validates_chain_status_evidence_references():
         assert "chain status references unknown evidence" in str(exc)
     else:
         raise AssertionError("expected validation error")
+
+
+def test_analysis_result_rejects_duplicate_evidence_ids():
+    evidence = Evidence(
+        id="ev_001",
+        source="hilog",
+        type="failure_log_hit",
+        summary="failure found",
+    )
+    duplicate = Evidence(
+        id="ev_001",
+        source="hilog",
+        type="expected_log_hit",
+        summary="same id",
+    )
+
+    try:
+        AnalysisResult(
+            feature="camera_capture",
+            conclusion=Conclusion(summary="failed", confidence="medium"),
+            root_causes=[],
+            chain_status=[],
+            evidence=[evidence, duplicate],
+            stats=AnalysisStats(),
+        )
+    except ValidationError as exc:
+        assert "duplicate evidence id" in str(exc)
+    else:
+        raise AssertionError("expected validation error")
