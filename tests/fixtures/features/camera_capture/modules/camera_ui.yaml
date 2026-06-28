@@ -1,0 +1,12 @@
+name: camera_ui
+display_name: 相机 UI
+code_path: applications/camera
+responsibility: 拍照入口
+symbols: []
+logs: []
+candidate_steps: []
+failure_signals: []
+metadata:
+  generated_by: hilog-agent
+  generated_at: "2026-06-28 14:35:00"
+  review_notes: []
